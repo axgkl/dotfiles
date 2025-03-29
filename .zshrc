@@ -1,6 +1,6 @@
 # Source zsh plugins
 source $HOME/.aliases
-source $HOME/.config/.zsh-vi-mode/zsh-vi-mode.plugin.zsh
+#source $HOME/.config/.zsh-vi-mode/zsh-vi-mode.plugin.zsh
 
 [ -d "/opt/homebrew/share/zsh-autosuggestions/" ] && source /opt/homebrew/share/zsh-autosuggestions/zsh-autosuggestions.zsh \
                                                   || source /usr/local/share/zsh-autosuggestions/zsh-autosuggestions.zsh

@@ -1,8 +1,30 @@
-
+# vi: ft=sh
 . $HOME/.config/nvim/shell_helpers
-alias kaero='pkill AeroSpace sketchybar borders'
+
+alias ...="cd .. && cd .."
+alias ..="cd .."
 alias ac="vi $HOME/.config/aerospace/aerospace.toml"
+alias add="git add"
 alias ai="vi -c 'CopilotChat' -c 'only'"
+alias cfg="git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME"
+alias commit="git commit"
+alias g="lazygit"
+alias gdiff="git diff HEAD"
 alias gov='cd $HOME/.config/nvim'
 alias govv='cd $HOME/.config/nvim'
+alias home="cd ~"
+alias kaero='pkill AeroSpace sketchybar borders'
+alias lg='lazygit'
+alias lgconf="lg --git-dir=$HOME/.cfg/ --work-tree=$HOME"
+alias log="git log --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit"
+alias pull="git pull"
+alias push="git push"
+alias stat="git status"
+alias vdiff="git difftool HEAD"
 alias vi=nvim
+alias x="exit"
+
+eval "$(starship init zsh)"
+eval "$(zoxide init --cmd cd zsh)"
+
+alias ssh="TERM=xterm-256color ssh"

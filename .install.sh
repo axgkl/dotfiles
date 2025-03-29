@@ -1,5 +1,4 @@
-#!/bin/zsh
-# vi: ft=sh
+#!/usr/bin/env bash
 # https://github.com/FelixKratz/dotfiles/blob/e6288b3f4220ca1ac64a68e60fced2d4c3e3e20b/.install.sh
 
 # Install xCode cli tools
@@ -36,6 +35,8 @@ brew install boost
 #brew install armadillo
 # mas, Mac App Store command-line interface. https://github.com/mas-cli/mas
 brew install mas
+# better ls
+brew install exa
 # Neovim, a hyperextensible Vim-based text editor. https://github.com/neovim/neovim
 brew install neovim
 # tree, a command-line utility to display directories as trees. http://mama.indstate.edu/users/ice/tree/
@@ -231,8 +232,8 @@ rm -rf /tmp/SFMono_Nerd_Font/
 
 # Copying and checking out configuration files
 echo "Planting Configuration Files..."
-[ ! -d "$HOME/dotfiles" ] && git clone --bare git@github.com:AXGKl/dotfiles.git $HOME/dotfiles
-git --git-dir=$HOME/dotfiles/ --work-tree=$HOME checkout master
+[ ! -d "$HOME/.dotfiles" ] && git clone --bare git@github.com:AXGKl/dotfiles.git $HOME/.dotfiles
+git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME checkout master
 
 source $HOME/.zshrc
 conf config --local status.showUntrackedFiles no
