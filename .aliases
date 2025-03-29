@@ -1,0 +1,8 @@
+
+. $HOME/.config/nvim/shell_helpers
+alias kaero='pkill AeroSpace sketchybar borders'
+alias ac="vi $HOME/.config/aerospace/aerospace.toml"
+alias ai="vi -c 'CopilotChat' -c 'only'"
+alias gov='cd $HOME/.config/nvim'
+alias govv='cd $HOME/.config/nvim'
+alias vi=nvim
