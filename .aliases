@@ -15,7 +15,7 @@ alias govv='cd $HOME/.config/nvim'
 alias home="cd ~"
 alias kaero='pkill AeroSpace sketchybar borders'
 alias lg='lazygit'
-alias lgconf="lg --git-dir=$HOME/.cfg/ --work-tree=$HOME"
+alias lgconf="lg --git-dir=$HOME/.dotfiles/ --work-tree=$HOME"
 alias log="git log --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit"
 alias pull="git pull"
 alias push="git push"
