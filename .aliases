@@ -85,10 +85,9 @@ lflow() {
     # Run tcpflow with:
     # -p: no promiscuous mode
     # -c: console output (no files)
-    # -C: console output with colors
-    # -T: no report.xml file
-    # port $port: filter for specific port
-    sudo tcpflow -p -C -c -T port "$port"
+    # -C: console output with colors  
+    # -q: quiet mode (suppress warnings/messages)
+    sudo tcpflow -p -C -c -q "port $port"
 }
 
 # Sketchybar interactivity overloads
