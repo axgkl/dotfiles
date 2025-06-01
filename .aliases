@@ -1,25 +1,60 @@
 # vi: ft=sh
 . $HOME/.config/nvim/shell_helpers
+export PATH="$PATH:$HOME/bin"
+# export NNN_TMPFILE="$HOME/.config/nnn/.lastd"
+export EDITOR="/opt/homebrew/bin/nvim"
+export BROWSER="$HOME/bin/browser"
+export VISUAL="/opt/homebrew/bin/nvim"
+export XDG_CONFIG_HOME="$HOME/.config"
+export FZF_DEFAULT_OPTS="--bind='Q:abort,K:up,J:down'"
+export FZF_DEFAULT_COMMAND='fd --type f'
+export COLORTERM=truecolor
+#export PAGER=most
+export GROFF_NO_SGR=1                         # https://github.com/vim/vim/issues/2823#issuecomment-607818851
+export KROKI_SERVER='https://axc2.axiros.com' # vpe
+export PLANTUML_HDR='!include https://axc2.axiros.com/puml/all_dark.puml'
+# Color Scheme
+export BLACK=0xff181819
+export WHITE=0xffe2e2e3
+export RED=0xfffc5d7c
+export GREEN=0xff9ed072
+export BLUE=0xff76cce0
+export YELLOW=0xffe7c664
+export ORANGE=0xfff39660
+export MAGENTA=0xffb39df3
+export GREY=0xff7f8490
+export TRANSPARENT=0x00000000
+export BG0=0xff2c2e34
+export BG1=0xff363944
+export BG2=0xff414550
 
 alias ...="cd .. && cd .."
 alias ..="cd .."
-alias ac="vi $HOME/.config/aerospace/aerospace.toml"
+alias ac='vi $HOME/.config/aerospace/aerospace.toml'
 alias add="git add"
 alias ai="vi -c 'CopilotChat' -c 'only'"
-alias conf="git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME"
+alias conf='git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME'
 alias commit="git commit"
+alias ct='source $HOME/uv/tools/.venv/bin/activate'
 alias g="lazygit"
 alias gdiff="git diff HEAD"
 alias gov='cd $HOME/.config/nvim'
 alias govv='cd $HOME/.config/nvim'
+alias t='just --justfile $HOME/uv/tools/justfile'
 alias home="cd ~"
+alias k='kubectl'
+alias kk='k9s -c pods'
 alias kaero='pkill AeroSpace sketchybar borders'
+alias lc='limactl'
+alias libreoffice='/Applications/LibreOffice.app/Contents/MacOS/soffice'
 alias lg='lazygit'
-alias lgconf="lg --git-dir=$HOME/.dotfiles/ --work-tree=$HOME"
+alias lgconf='lg --git-dir=$HOME/.dotfiles/ --work-tree=$HOME'
 alias log="git log --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit"
+alias pin='gping 8.8.8.8 10.0.0.1'
 alias pull="git pull"
 alias push="git push"
 alias stat="git status"
+alias swapdel='rm -rf "$HOME/.local/state/nvim/swap/"'
 alias vdiff="git difftool HEAD"
 alias vi=nvim
 alias x="exit"

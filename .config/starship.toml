@@ -1,30 +1,68 @@
-add_newline = false
+right_format = """
+$git_status\
+$conda\
+$python\
+"""
 
-[character]
-success_symbol = '[ #](bold green)'
-error_symbol = "[ x](bold red)"
-vicmd_symbol = "[ V](bold green)"
 
-[git_status]
-disabled = false
+format = """
+ \
+$directory\
+[](fg:b2)\
+$character"""
+# 
+# [ ](fg:#171822 bg:#001a1d)\
+# $git_status\
+# [](fg:#212736 bg:#212736)\
+# $conda\
+# [ ](fg:#1d2230)\
 
-[git_commit]
-commit_hash_length = 7
-tag_disabled = false
-only_detached = false
+palette = 'gk'
+[palettes.gk]
+f1 = '#a3aed2'
+b1 = '#4c566a'
+f2 = '#a3aed2'
+b2 = '#212736'
+f3 = '#727DB0'
+b3 = '#1c202a'
 
-[battery]
-disabled = true
-
-[python]
-disabled = true
-
-[cmake]
-disabled = true
 
 [directory]
-read_only = "(read only)"
+style = "fg:f3 bg:b2"
+format = "[$path]($style)"
+truncation_length = 3
+truncation_symbol = "…/"
 
-[git_metrics]
-disabled = false
-format = '([+$added]($added_style)) ([-$deleted]($deleted_style)) '
+[directory.substitutions]
+"Documents" = "󰈙 "
+"Downloads" = " "
+"Music" = " "
+".config" = "⚙️ "
+"Pictures" = " "
+
+
+[git_status]
+style = "bg:#394260"
+format = '[[ ($all_status$ahead_behind )](fg:f3)]($style)'
+
+[nodejs]
+symbol = ""
+style = "bg:#212736"
+format = '[[ $symbol ($version) ](fg:#769ff0 bg:#212736)]($style)'
+
+[golang]
+symbol = ""
+style = "bg:#212736"
+format = '[[ $symbol ($version) ](fg:#769ff0 bg:#212736)]($style)'
+
+
+[python]
+# By default, Starship will show the virtual environment name if it is active
+# You can customize the format as needed
+format = "[${symbol}${pyenv_prefix}(${version} )]($style)"
+pyenv_prefix = "pyenv "
+
+[conda]
+style = "bg:#394260"
+format = '[$symbol $environment](fg:f3)'
+symbol = "🅒"

@@ -16,9 +16,13 @@ brew analytics off
 echo "Installing Brew Formulae..."
 brew tap homebrew/cask-fonts
 brew tap FelixKratz/formulae
+brew tap dimentium/autoraise
 # yabai: brew tap koekeishiya/formulae
 
 # Brew Formulae
+# focus follows mouse:
+brew install autoraise
+brew services start autoraise
 
 brew install lua
 # GNU Scientific Library, a numerical library for C and C++. https://www.gnu.org/software/gsl/
@@ -171,7 +175,7 @@ defaults write NSGlobalDomain AppleHighlightColor -string "0.65098 0.85490 0.584
 # Sets the accent color to blue.
 defaults write NSGlobalDomain AppleAccentColor -int 1
 # Sets the default location for screenshots to the Desktop.
-defaults write com.apple.screencapture location -string "$HOME/Desktop"
+defaults write com.apple.screencapture location -string "$HOME/Pictures/shots"
 # Disables shadows in screenshots.
 defaults write com.apple.screencapture disable-shadow -bool true
 # Sets the default screenshot format to PNG.
@@ -216,6 +220,7 @@ defaults write com.apple.Safari com.apple.Safari.ContentPageGroupIdentifier.WebK
 defaults write NSGlobalDomain WebKitDeveloperExtras -bool true
 # Prevents Mail from including names when copying email addresses.
 defaults write com.apple.mail AddressesIncludeNameOnPasteboard -bool false
+defaults write com.apple.dock workspaces-auto-swoosh -bool NO
 
 echo "Installing Sketchybar"
 brew install nowplaying-cli
@@ -259,8 +264,10 @@ conf config --local status.showUntrackedFiles no
 echo "Starting Services (grant permissions)..."
 #brew services start skhd
 #brew services start fyabai
-#brew services restart sketchybar
 #brew services rebrew services restart svim
+brew services restart borders
+brew services restart sketchybar
+brew services restart autoraise
 
 csrutil status
 echo "Do not forget to disable SIP and reconfigure keyboard -> $HOME/.config/keyboard..."
