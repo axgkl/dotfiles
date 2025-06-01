@@ -1,0 +1,10 @@
+# This is Git's per-user configuration file.
+[user]
+# Please adapt and uncomment the following lines:
+name = Gunther Klessinger
+email = gk@mba.local
+[alias]
+	url = !/Users/gk/bin/gitcmd.sh url
+	files = !/Users/gk/bin/gitcmd.sh files
+[pull]
+	rebase = true
