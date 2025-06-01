@@ -1,4 +1,4 @@
-source $HOME/.config/.zsh-vi-mode/zsh-vi-mode.plugin.zsh
+#source $HOME/.config/.zsh-vi-mode/zsh-vi-mode.plugin.zsh
 # Add ~/bin to PATH
 export PATH="$HOME/bin:$PATH"
 
