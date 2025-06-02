@@ -63,41 +63,6 @@ eval "$(starship init zsh)"
 eval "$(zoxide init --cmd cd zsh)"
 
 alias ssh="TERM=xterm-256color ssh"
-
-# TCP flow monitoring function
-lflow() {
-    if [ $# -eq 0 ]; then
-        echo "Usage: lflow <port>"
-        echo "Example: lflow 80"
-        return 1
-    fi
-    
-    local port=$1
-    
-    # Validate port number
-    if ! [[ "$port" =~ ^[0-9]+$ ]] || [ "$port" -lt 1 ] || [ "$port" -gt 65535 ]; then
-        echo "Error: Invalid port number. Please provide a port between 1-65535."
-        return 1
-    fi
-    
-    echo "Starting tcpflow on port $port (Ctrl+C to stop)..."
-    
-    # Run tcpflow with:
-    # -p: no promiscuous mode
-    # -c: console output (no files)
-    # -C: console output with colors  
-    # -q: quiet mode (suppress warnings/messages)
-    sudo tcpflow -p -C -c -q "port $port"
-}
-
-# Sketchybar interactivity overloads
-function brew() {
-    command brew "$@"
-    if [[ $* =~ "upgrade" ]] || [[ $* =~ "update" ]] || [[ $* =~ "outdated" ]]; then
-        sketchybar --trigger brew_update
-    fi
-}
-
 # function nnn () {
 #     command nnn "$@"
 #

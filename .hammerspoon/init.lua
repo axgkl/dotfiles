@@ -30,6 +30,7 @@ local scrollWatcher = eventtap.new({ event.types.scrollWheel }, function(e)
 	end
 end)
 
+
 scrollWatcher:start()
 -- Refresh the eventtap periodically to prevent it from being disabled
 local refreshTimer = HS.timer.doEvery(10, function()
