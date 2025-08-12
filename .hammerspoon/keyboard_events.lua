@@ -56,7 +56,7 @@ function M.setup(bindFunction, notifyFunction)
 	local Notify = notifyFunction
 	
 	-- Toggle key logger with Cmd+Ctrl+K
-	Bind({ "cmd", "ctrl" }, "k", function()
+	Bind({ "cmd", "ctrl" }, "k", "Toggle keyboard event logger", function()
 		if keyLogger:isEnabled() then
 			keyLogger:stop()
 			-- Send event that logging stopped

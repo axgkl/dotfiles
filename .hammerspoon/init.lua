@@ -1,5 +1,50 @@
 HS = hs
-Bind = HS.hotkey.bind
+
+-- Hotkey registration system
+local hotkeyRegistry = {}
+
+-- Enhanced Bind function with registration and description
+-- Usage: Bind(mods, key, description, fn)
+function Bind(mods, key, description, fn)
+	-- Register the hotkey with description
+	table.insert(hotkeyRegistry, {
+		mods = mods,
+		key = key,
+		description = description or "No description",
+		fn = fn,
+	})
+
+	-- Call the original bind function
+	return HS.hotkey.bind(mods, key, fn)
+end
+
+-- Function to write keybinds to markdown file
+function writeKeymapsToFile()
+	local filePath = HS.configdir .. "/keymaps.md"
+	local content = { "# Hammerspoon Keybinds\n" }
+
+	table.insert(content, "| Modifiers | Key | Description |")
+	table.insert(content, "|-----------|-----|-------------|")
+
+	for _, entry in ipairs(hotkeyRegistry) do
+		local mods = table.concat(entry.mods, "+")
+		local key = string.lower(entry.key) -- Ensure lowercase for consistency
+		local row = string.format("| %s | %s | %s |", mods, key, entry.description)
+		table.insert(content, row)
+	end
+
+	table.insert(content, string.format("\n**Total: %d hotkeys registered**", #hotkeyRegistry))
+
+	local file = io.open(filePath, "w")
+	if file then
+		file:write(table.concat(content, "\n"))
+		file:close()
+		print("Keymaps written to " .. filePath)
+	else
+		print("Failed to write keymaps file")
+	end
+end
+
 function Notify(message)
 	local time = os.date("%H:%M:%S")
 	HS.execute(
@@ -7,7 +52,8 @@ function Notify(message)
 		false
 	)
 end
-Bind({ "cmd", "ctrl" }, "r", function()
+
+Bind({ "cmd", "ctrl" }, "r", "Reload Hammerspoon configuration", function()
 	Notify("Reloading Hammerspoon")
 	HS.reload()
 end)
@@ -29,8 +75,6 @@ local scrollWatcher = eventtap.new({ event.types.scrollWheel }, function(e)
 		return true
 	end
 end)
-
-
 scrollWatcher:start()
 -- Refresh the eventtap periodically to prevent it from being disabled
 local refreshTimer = HS.timer.doEvery(10, function()
@@ -61,10 +105,6 @@ function YWIN(action, args)
 		return false
 	end
 end
--- function YSPCE(action, args)
--- 	local cmd = string.format("%s -m space --%s %s", YABAI, action, args)
--- 	HS.execute(cmd, false)
--- end
 
 function WIN(action, args, onError)
 	return function()
@@ -77,10 +117,8 @@ end
 function EXEC(cmd)
 	return function()
 		HS.execute(cmd, false)
-		--ClickAtCurrentPosition()
 	end
 end
---TERMOPEN = [[open -na Ghostty && sleep 1.0 && yabai -m window --focus $(yabai -m query --windows | jq 'map(select(.app == "Ghostty")) | sort_by(.id) | last | .id') ]]
 
 function ClickAtCurrentPosition()
 	local currentPosition = HS.mouse.absolutePosition()
@@ -88,68 +126,65 @@ function ClickAtCurrentPosition()
 	HS.eventtap.event.newMouseEvent(HS.eventtap.event.types.leftMouseUp, currentPosition):post()
 end
 
-Bind(CMDCTRL, "L", function()
+-- Text insertion shortcuts
+Bind(CMDCTRL, "L", "Type localhost IP address", function()
 	HS.eventtap.keyStrokes("127.0.0.1")
 end)
-Bind(CMDCTRL, "V", function()
+
+Bind(CMDCTRL, "V", "Type Discord channel URL", function()
 	HS.eventtap.keyStrokes("https://discord.com/channels/1210288790858375219/1330835593445245050 ")
 end)
 
-TERMOPEN = "/Applications/WezTerm.app/Contents/MacOS/wezterm-gui start --always-new-process"
-Bind({ "ctrl" }, "F9", EXEC("pmset sleepnow"))
---Bind(HYPER, "t", EXEC("open -na wezterm"))
-Bind(CMDSHF, "t", EXEC("open -na Ghostty"))
-Bind(CMDALT, "8", EXEC("open -na Wezterm --args start --always-new-process")) -- no gui
+-- System and terminal shortcuts
 
--- HS.hotkey.bind(CMDALT, "8", function()
--- 	HS.task
--- 		.new("/usr/bin/open", nil, function()
--- 			return true
--- 		end, { "-na", "WezTerm", "--args", "start", "--always-new-process" })
--- 		:start()
--- end)
---Bind(CMDALT, "8", EXEC("open -na Wezterm"))
--- Open new WezTerm instance with Cmd+Alt+Return
--- Bind(CMDALT, "8", function()
--- 	HS.task
--- 		.new("/opt/homebrew/bin/wezterm", nil, function()
--- 			return true
--- 		end, { "start", "--always-new-process" })
--- 		:start()
--- end)
-Bind(CMDSHF, "C", EXEC(HOTKEY .. " copycolor"))
+Bind(CMDSHF, "t", "Open new Ghostty terminal", EXEC("open -na Ghostty"))
+Bind(CMDSHF, "C", "Copy color at cursor position", EXEC(HOTKEY .. " copycolor"))
 
-Bind(CMDSHF, "H", WIN("resize", "right:-50:0", WIN("resize", "left:-50:0")))
-Bind(CMDSHF, "L", WIN("resize", "left:50:0", WIN("resize", "right:50:0")))
-Bind(CMDALT, "J", WIN("resize", "top:0:-50", WIN("resize", "bottom:0:-50")))
-Bind(CMDALT, "K", WIN("resize", "bottom:0:50", WIN("resize", "top:0:50")))
-Bind(CMDSHF, "J", WIN("focus", "prev", WIN("focus", "last")))
-Bind(CMDSHF, "K", WIN("focus", "next", WIN("focus", "first")))
+-- Window management - resize
+Bind(CMDSHF, "H", "Resize window left (shrink width)", WIN("resize", "right:-50:0", WIN("resize", "left:-50:0")))
+Bind(CMDSHF, "L", "Resize window right (expand width)", WIN("resize", "left:50:0", WIN("resize", "right:50:0")))
+Bind(CMDALT, "J", "Resize window down (shrink height)", WIN("resize", "top:0:-50", WIN("resize", "bottom:0:-50")))
+Bind(CMDALT, "K", "Resize window up (expand height)", WIN("resize", "bottom:0:50", WIN("resize", "top:0:50")))
 
-Bind(CMDSHF, "space", WIN("swap", "next", WIN("swap", "first")))
-Bind(CMDSHF, "return", WIN("toggle", "zoom-fullscreen"))
-Bind({ "ctrl", "shift" }, "return", WIN("display", "recent"))
-Bind({ "ctrl", "shift" }, "space", EXEC(YABAI .. " -m space --balance"))
-Bind(CMDSHF, "i", WIN("toggle", "sticky"))
-Bind(CMDSHF, "u", WIN("toggle", "float"))
-Bind(CMDSHF, "o", WIN("toggle", "split"))
+-- Window management - focus
+Bind(CMDSHF, "J", "Focus previous window", WIN("focus", "prev", WIN("focus", "last")))
+Bind(CMDSHF, "K", "Focus next window", WIN("focus", "next", WIN("focus", "first")))
 
--- sip on did not work fuck, so with have sa loaded and can do space:
-local allKeys = { "1", "2", "3", "4", "5", "6", "7", "8", "9", "0", ".", "," }
+-- Window management - actions
+Bind(CMDSHF, "space", "Swap window with next", WIN("swap", "next", WIN("swap", "first")))
+Bind(CMDSHF, "return", "Toggle fullscreen zoom", WIN("toggle", "zoom-fullscreen"))
+Bind(CMDSHF, "d", "Move window to recent display", WIN("display", "recent"))
+Bind(CMDSHF, "b", "Balance space layout", EXEC(YABAI .. " -m space --balance"))
+Bind(CMDSHF, "i", "Toggle window sticky mode", WIN("toggle", "sticky"))
+Bind(CMDSHF, "u", "Toggle window floating mode", WIN("toggle", "float"))
+Bind(CMDSHF, "o", "Toggle window split orientation", WIN("toggle", "split"))
+
+-- Space switching with number keys
+local allKeys = { "1", "2", "3", "4", "5", "6", "7", "8", "9", "0" }
 for i, key in ipairs(allKeys) do
-	Bind(CMDSHF, key, function()
+	Bind(CMDSHF, key, "Move window to space " .. i, function()
 		YWIN("space", tostring(i))
 	end)
 end
--- Import keyboard events module
-local KeyboardEvents = require('keyboard_events')
 
+local allKeys = { "1", "2", "3" }
+for i, key in ipairs(allKeys) do
+	Bind(CMDALTS, key, "Move window to space " .. i, function()
+		YWIN("space", tostring(i + 10))
+	end)
+end
+
+-- Import keyboard events module
+local KeyboardEvents = require("keyboard_events")
 -- Setup keyboard event logging (pass Bind and Notify functions)
 KeyboardEvents.setup(Bind, Notify)
 
-Bind({ "ctrl" }, "f5", EXEC(HOTKEY .. " screenshot"))
-Bind({ "ctrl", "cmd" }, "f5", EXEC(HOTKEY .. " screenshot interactive"))
-Bind({ "cmd" }, "f1", function()
+-- Screenshot shortcuts
+--Bind({ "ctrl" }, "f5", "Take screenshot", EXEC(HOTKEY .. " screenshot"))
+--Bind({ "ctrl", "cmd" }, "f5", "Take interactive screenshot", EXEC(HOTKEY .. " screenshot interactive"))
+
+-- Force quit current application
+Bind({ "cmd" }, "f1", "Force quit current application", function()
 	local frontmostApp = HS.application.frontmostApplication()
 	if frontmostApp then
 		local appName = frontmostApp:name()
@@ -157,192 +192,32 @@ Bind({ "cmd" }, "f1", function()
 		HS.alert.show("SIGKILL sent to " .. appName)
 	end
 end)
---
--- -- win to space with sip on: switch to space here, then call yabai
--- function MissCtrlId(spcnr)
--- 	local handle = io.popen(YABAI .. " -m query --spaces | jq '.[] | select(.index == " .. spcnr .. ") | .id'")
--- 	local result = handle:read("*a")
--- 	handle:close()
--- 	return tonumber(result:match("^%s*(.-)%s*$"))
--- end
--- function Win2spc(nr)
--- 	return function()
--- 		local mid = MissCtrlId(nr)
--- 		local win = hs.window.focusedWindow()
--- 		HS.spaces.gotoSpace(mid)
--- 		--HS.timer.usleep(1000000)
--- 		--HS.spaces.moveWindowToSpace(win, mid)
--- 		HS.execute(HOTKEY .. " win2spc " .. win:id() .. " " .. nr, false)
--- 	end
--- end
 
--- Bind(CMDALTS, "1", EXEC("open -a Mail"))
--- Bind(CMDALTS, "2", EXEC("open -a Calendar"))
--- Bind(CMDALTS, "3", EXEC("open -a Discord"))
--- Bind(CMDALTS, "4", EXEC("open -a Zen"))
--- Bind(CMDALTS, "5", EXEC("open -a wezterm"))
--- Bind(CMDALTS, "6", EXEC("open -a 'Google Chrome'"))
+-- Write keymaps to file after all bindings are registered
+HS.timer.doAfter(1, writeKeymapsToFile)
+
+-- Commented out sections from original file for reference:
+
+-- Application shortcuts (commented out)
+-- Bind(CMDALTS, "1", "Open Mail app", EXEC("open -a Mail"))
+-- Bind(CMDALTS, "2", "Open Calendar app", EXEC("open -a Calendar"))
+-- Bind(CMDALTS, "3", "Open Discord app", EXEC("open -a Discord"))
+-- Bind(CMDALTS, "4", "Open Zen browser", EXEC("open -a Zen"))
+-- Bind(CMDALTS, "5", "Open WezTerm", EXEC("open -a wezterm"))
+-- Bind(CMDALTS, "6", "Open Google Chrome", EXEC("open -a 'Google Chrome'"))
+
+-- Advanced space management (commented out)
 -- local keyMapping = { "x", "c", "v", "s", "d", "f", "w", "e", "r", "1", "2", "3", "4" }
 -- for i = 1, 13 do
--- 	Bind(HYPER, keyMapping[i], function()
+-- 	Bind(HYPER, keyMapping[i], "Focus space " .. i, function()
 -- 		YSPCE("focus", tostring(i))
 -- 	end)
--- 	Bind(HYPRS, keyMapping[i], WIN("space", tostring(i)))
--- 	Bind(ALTS, keyMapping[i], function()
+-- 	Bind(HYPRS, keyMapping[i], "Move window to space " .. i, WIN("space", tostring(i)))
+-- 	Bind(ALTS, keyMapping[i], "Move window and focus space " .. i, function()
 -- 		YWIN("space", tostring(i))
 -- 		YSPCE("focus", tostring(i))
 -- 	end)
 -- end
 
--- hs.hotkey.bind({ "ctrl" }, "f5", function()
--- 	print(hs.execute(YABAI .. " -m query --spaces --space | jq -r '.index'"))
--- end)
-
-----local yabai_menu = hs.menubar.new()
---
----- Function to check if a desktop (space) has windows
---local function getDesktopsWithWindows()
---	local command = YABAI .. " -m query --windows"
---	local startTime = hs.timer.secondsSinceEpoch()
---
---	local output, status = hs.execute(command)
---	local endTime = hs.timer.secondsSinceEpoch()
---	print(string.format("Elapsed Time: %.2f seconds", endTime - startTime))
---
---	local has_windws = {}
---	if status then
---		local windows = hs.json.decode(output)
---		--print("windows" .. hs.inspect(windows))
---		for _, window in ipairs(windows) do
---			has_windws[window.space] = true -- Mark the desktop as having windows
---		end
---	end
---	return has_windws
---end
---
---local function generateDesktopString(activeDesktop, desktopsWithWindows)
---	-- local nrs = { "①", "②", "③", "④", "⑤", "⑥", "⑦", "⑧", "⑨", "⓪", "①", "②", "③" }
---	local n = { "𝟷", "𝟸", "𝟹", "𝟺", "𝟻", "𝟼", "𝟽", "𝟾", "𝟿", "𝟶", "𝟷", "𝟸", "𝟹" }
---	--local anr = { "➊", "➋", "➌", "➍", "➎", "➏", "➐", "➑", "➒", "●", "➊", "➋", "➌" }
---	local anr = { "1̲", "2̲", "3̲", "4̲", "5̲", "6̲", "7̲", "8̲", "9̲", "0̲", "1̲", "2̲", "3̲" }
---
---	for i = 1, #n do
---		if not desktopsWithWindows[i] then
---			n[i] = "▪"
---		end
---	end
---
---	if activeDesktop and activeDesktop >= 1 and activeDesktop <= 13 then
---		n[activeDesktop] = anr[activeDesktop]
---	end
---
---	return table.concat(n)
---end
---
----- Update the menu bar widget with the active desktop
---local function update_yabai_menu(activeDesktop)
---	local desktopsWithWindows = getDesktopsWithWindows()
---	yabai_menu:setTitle(generateDesktopString(activeDesktop, desktopsWithWindows))
---end
---
----- local wf = hs.window.filter.default
----- wf:subscribe(hs.window.filter.windowFocused, function(window)
----- 	if window then
----- 		local output, status = hs.execute(YABAI .. " -m query --spaces --space | jq -r '.index'")
----- 		if status then
----- 			local desktopNumber = tonumber(output:match("%d+"))
----- 			if desktopNumber then
----- 				update_yabai_menu(desktopNumber)
----- 			end
----- 		end
----- 	end
----- end)
-----
----- update_yabai_menu(nil)
-----
----- local function handleYabaiEvent(event)
----- 	print("Space changed!")
----- end
-----
----- local yabaiTask = hs.task.new("/usr/bin/env", function(exitCode, stdOut, stdErr)
----- 	if exitCode == 0 then
----- 		handleYabaiEvent(stdOut)
----- 	else
----- 		hs.alert.show("Error: " .. stdErr)
----- 	end
----- end, function(task, stdOut, stdErr)
----- 	handleYabaiEvent(stdOut)
----- 	return true -- Continue reading output
----- end, { "yabai", "-m", "signal", "--add", "event=space_changed", "action=echo space_changed" })
-----
----- yabaiTask:start()
-----
----- local function getBundleID(appName)
----- 	local app = hs.application.find(appName)
----- 	if app then
----- 		return app:bundleID()
----- 	else
----- 		return nil
----- 	end
----- end
-----
----- local function getAppImage(appName)
----- 	local bundleID = getBundleID(appName)
----- 	if bundleID then
----- 		return hs.image.imageFromAppBundle(bundleID)
----- 	else
----- 		return nil
----- 	end
----- end
-----
----- local function createCombinedImage(apps)
----- 	local canvas = hs.canvas.new({ x = 0, y = 0, w = #apps * 32, h = 32 })
----- 	for i, appName in ipairs(apps) do
----- 		local img = getAppImage(appName)
----- 		if img then
----- 			canvas[i] = {
----- 				type = "image",
----- 				image = img,
----- 				frame = { x = (i - 1) * 32, y = 0, w = 32, h = 32 },
----- 			}
----- 		end
----- 	end
----- 	return canvas:imageFromCanvas()
----- end
-----
----- local function generateMenu()
----- 	local wins = hs.execute(YABAI .. " -m query --windows", true)
----- 	print(wins)
----- 	local yabaiOutput = hs.json.decode(wins)
----- 	local spaces = {}
-----
----- 	-- Group apps by space
----- 	for _, window in ipairs(yabaiOutput) do
----- 		if not spaces[window.space] then
----- 			spaces[window.space] = {}
----- 		end
----- 		table.insert(spaces[window.space], window.app)
----- 	end
-----
----- 	local sortedSpaces = {}
----- 	for space in pairs(spaces) do
----- 		table.insert(sortedSpaces, space)
----- 	end
----- 	table.sort(sortedSpaces)
----- 	-- Create menu entries
----- 	local menuEntries = {}
----- 	for _, space in ipairs(sortedSpaces) do
----- 		local apps = spaces[space]
----- 		local combinedImage = createCombinedImage(apps)
----- 		table.insert(menuEntries, {
----- 			title = "Space " .. space,
----- 			image = combinedImage,
----- 			fn = function()
----- 				hs.alert.show("Apps on Space " .. space .. ": " .. table.concat(apps, ", "))
----- 			end,
----- 		})
----- 	end
----- 	return menuEntries
----- end
----- --yabai_menu:setMenu(generateMenu)
->>>>>>> 21ec991 (add on)
+-- Menu bar functionality (commented out - extensive yabai desktop tracking code)
+-- This section contained complex desktop monitoring and menu bar updates

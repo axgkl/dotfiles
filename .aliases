@@ -2,6 +2,7 @@
 . $HOME/.config/nvim/shell_helpers
 export PATH="$PATH:$HOME/bin"
 # export NNN_TMPFILE="$HOME/.config/nnn/.lastd"
+export AIDER_CODE_THEME='lightbulb'
 export EDITOR="/opt/homebrew/bin/nvim"
 export BROWSER="$HOME/bin/browser"
 export VISUAL="/opt/homebrew/bin/nvim"
@@ -32,7 +33,7 @@ alias ...="cd .. && cd .."
 alias ..="cd .."
 alias ac='vi $HOME/.config/aerospace/aerospace.toml'
 alias add="git add"
-alias ai="vi -c 'CopilotChat' -c 'only'"
+alias ai="vi -c 'CodeCompanionChat' -c 'only'"
 alias conf='git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME'
 alias commit="git commit"
 alias ct='source $HOME/uv/tools/.venv/bin/activate'
@@ -42,6 +43,7 @@ alias gov='cd $HOME/.config/nvim'
 alias govv='cd $HOME/.config/nvim'
 alias t='just --justfile $HOME/uv/tools/justfile'
 alias home="cd ~"
+alias jr="just reconcile"
 alias k='kubectl'
 alias kk='k9s -c pods'
 alias kaero='pkill AeroSpace sketchybar borders'
@@ -49,6 +51,7 @@ alias lc='limactl'
 alias libreoffice='/Applications/LibreOffice.app/Contents/MacOS/soffice'
 alias lg='lazygit'
 alias lgconf='lg --git-dir=$HOME/.dotfiles/ --work-tree=$HOME'
+alias lflow='sudo tcpflow -i any -g -c -X /dev/null port '
 alias log="git log --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit"
 alias pin='gping 8.8.8.8 10.0.0.1'
 alias pull="git pull"
@@ -56,13 +59,13 @@ alias push="git push"
 alias stat="git status"
 alias swapdel='rm -rf "$HOME/.local/state/nvim/swap/"'
 alias vdiff="git difftool HEAD"
-alias vi=nvim
 alias x="exit"
+alias zrm='zoxide remove `pwd`'
 
 eval "$(starship init zsh)"
 eval "$(zoxide init --cmd cd zsh)"
 
-alias ssh="TERM=xterm-256color ssh"
+#alias ssh="TERM=xterm-256color ssh"
 # function nnn () {
 #     command nnn "$@"
 #
@@ -75,6 +78,36 @@ alias ssh="TERM=xterm-256color ssh"
 #     ~/.config/sketchybar/plugins/zen.sh $1
 # }
 
+function vi {
+    test -d ./.venv/bin && . .venv/bin/activate
+    nvim "$@"
+}
+function copyshot {
+    cp "$HOME/Pictures/shots/last.png" .
+    test -n "$1" || {
+        ll last.png
+        return
+    }
+    local pic="$1"
+    [[ "$pic" != *.png ]] && pic="$pic.png"
+    mkdir -p "$(dirname "$pic")"
+    mv "last.png" "$pic"
+    ll "$pic"
+}
+
+function colors() {
+    for fgbg in 38 48; do         # Foreground/Background
+        for color in {0..255}; do # Colors (0-255, not 0-256)
+            # Display the color
+            printf "\e[${fgbg};5;${color}m %3d\t\e[0m" "$color"
+            # Display 10 colors per line
+            if [ $(((color + 1) % 10)) -eq 0 ]; then
+                echo # New line
+            fi
+        done
+        echo # New line
+    done
+}
 function killname() {
     command kill -KILL $(pidof "$@")
 }
@@ -94,3 +127,15 @@ function o() {
     rm -f -- "$tmp"
 }
 source "$HOME/.cargo/env"
+
+function premail {
+    cd "$HOME/uv/imap-easybox"
+    ./.venv/bin/python3 ./premail.py "$@"
+}
+
+# Serve current directory on specified port (default 8000)
+function serve {
+    local port=${1:-8000}
+    echo "Serving current directory at http://localhost:$port"
+    python3 -m http.server $port
+}

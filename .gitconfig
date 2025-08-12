@@ -3,8 +3,18 @@
 # Please adapt and uncomment the following lines:
 name = Gunther Klessinger
 email = gk@mba.local
+# rest restores the filesystem of a previous commit, w/o changing the HEAD pointer
 [alias]
 	url = !/Users/gk/bin/gitcmd.sh url
 	files = !/Users/gk/bin/gitcmd.sh files
+	rt = !/Users/gk/bin/gitcmd.sh restore-to
+	up = !/Users/gk/bin/gitupdate .
+	co = !git checkout
 [pull]
 	rebase = true
+[credential "https://github.com"]
+	helper = 
+	helper = !/opt/homebrew/bin/gh auth git-credential
+[credential "https://gist.github.com"]
+	helper = 
+	helper = !/opt/homebrew/bin/gh auth git-credential

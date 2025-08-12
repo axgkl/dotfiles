@@ -82,7 +82,56 @@ autoload -Uz compinit
 compinit
 zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}' 'r:|[._-]=* r:|=*' 'l:|=* r:|=*'
 
+# Enable fallback to file completion when command-specific completion isn't available
+setopt COMPLETE_IN_WORD
+setopt AUTO_MENU
+# Add _files to the completer list so it's always tried as a fallback
+zstyle ':completion:*' completer _complete _approximate _files
+# Make file completion work better
+zstyle ':completion:*' file-patterns '*:all-files'
+
 
 # # Generated for envman. Do not edit.
 # [ -s "$HOME/.config/envman/load.sh" ] && source "$HOME/.config/envman/load.sh"
 
+
+#source $HOME/.config/.zsh-vi-mode/zsh-vi-mode.plugin.zsh
+# Add ~/bin to PATH
+export PATH="$HOME/bin:$PATH"
+
+# Add Atuin to PATH
+export PATH="$HOME/.atuin/bin:$PATH"
+
+# Configure zsh-vi-mode to work with Atuin
+function zvm_after_init() {
+  # Initialize Atuin
+  eval "$(atuin init zsh)"
+  
+  # Manually rebind Ctrl+R for Atuin in both modes
+  bindkey -M vicmd '^R' atuin-search-vicmd
+  bindkey -M viins '^R' atuin-search-viins
+  # Also bind in emacs mode just in case
+  bindkey -M emacs '^R' atuin-search
+}
+
+
+source /Users/gk/.config/broot/launcher/bash/br
+
+# >>> mamba initialize >>>
+# !! Contents within this block are managed by 'micromamba shell init' !!
+# export MAMBA_EXE='/opt/homebrew/bin/micromamba';
+# export MAMBA_ROOT_PREFIX='/Users/gk/micromamba';
+# __mamba_setup="$("$MAMBA_EXE" shell hook --shell zsh --root-prefix "$MAMBA_ROOT_PREFIX" 2> /dev/null)"
+# if [ $? -eq 0 ]; then
+#     eval "$__mamba_setup"
+# else
+#     alias micromamba="$MAMBA_EXE"  # Fallback on help from micromamba activate
+# fi
+# unset __mamba_setup
+# <<< mamba initialize <<<
+
+# PATH="/Users/gk/perl5/bin${PATH:+:${PATH}}"; export PATH;
+# PERL5LIB="/Users/gk/perl5/lib/perl5${PERL5LIB:+:${PERL5LIB}}"; export PERL5LIB;
+# PERL_LOCAL_LIB_ROOT="/Users/gk/perl5${PERL_LOCAL_LIB_ROOT:+:${PERL_LOCAL_LIB_ROOT}}"; export PERL_LOCAL_LIB_ROOT;
+# PERL_MB_OPT="--install_base \"/Users/gk/perl5\""; export PERL_MB_OPT;
+# PERL_MM_OPT="INSTALL_BASE=/Users/gk/perl5"; export PERL_MM_OPT;
