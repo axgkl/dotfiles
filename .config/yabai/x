@@ -1,0 +1,62 @@
+#!/usr/bin/env sh
+# https://github.com/linkarzu/dotfiles-latest/blob/main/yabai/yabairc. config from sketchybar author dotfiles though
+yabai -m signal --add event=dock_did_restart action="sudo yabai --load-sa"
+
+PY=/Users/gk/uv/osx/.venv/bin/python3
+for mode in win spc; do
+    fifo="/tmp/yabai-$mode.fifo"
+    rm -f "$fifo" && mkfifo "$fifo"
+    if [ $mode = win ]; then
+        yabai -m signal --add event=window_focused action='echo "window_focused $YABAI_WINDOW_ID" > '$fifo''
+        yabai -m signal --add event=window_destroyed action='echo "window_destroyed $YABAI_WINDOW_ID" > '$fifo''
+        #yabai -m signal --add app='^Ghostty$' event=window_created action='echo "ghostty_created $YABAI_WINDOW_ID" > '$fifo''
+    else
+        yabai -m signal --add event=space_changed action='echo "space_changed $YABAI_SPACE_ID $YABAI_SPACE_INDEX" > '$fifo''
+    fi
+    $PY /Users/gk/uv/osx/yabairc "$fifo" &
+done
+sudo yabai --load-sa
+
+#yabai -m config external_bar all:28:0 \
+yabai -m config external_bar all:0:0 \
+    debug_output off \
+    mouse_follows_focus on \
+    focus_follows_mouse autofocus \
+    window_zoom_persist off \
+    window_placement first_child \
+    window_shadow float \
+    window_opacity on \
+    window_opacity_duration 0.2 \
+    active_window_opacity 1.0 \
+    normal_window_opacity 0.8 \
+    window_animation_duration 0.2 \
+    window_animation_easing ease_out_quint \
+    insert_feedback_color 0xff9dd274 \
+    split_ratio 0.50 \
+    auto_balance off \
+    mouse_modifier ctrl \
+    mouse_action1 move \
+    mouse_action2 resize \
+    mouse_drop_action swap \
+    top_padding 0 \
+    bottom_padding 0 \
+    left_padding 8 \
+    right_padding 0 \
+    window_gap 8
+
+# Exclude problematic apps from being managed:
+#yabai -m rule --add app="^(Digital Color Meter)$" manage=on
+yabai -m rule --add app="^(LuLu|Calculator|Software Update|Dictionary|System Preferences|System Settings|zoom.us|Photo Booth|Archive Utility|Python|LibreOffice|App Store|Steam|Alfred|Activity Monitor)$" manage=off
+yabai -m rule --add label="Finder" app="^Finder$" title="(Co(py|nnect)|Move|Info|Pref)" manage=off
+yabai -m rule --add label="Safari" app="^Safari$" title="^(General|(Tab|Password|Website|Extension)s|AutoFill|Se(arch|curity)|Privacy|Advance)$" manage=off
+yabai -m rule --add label="About This Mac" app="System Information" title="About This Mac" manage=off
+yabai -m rule --add label="Select file to save to" app="^Inkscape$" title="Select file to save to" manage=off
+yabai -m rule --add app="^wezterm-gui$" title=".*" manage=on
+yabai -m config layout bsp
+# THIS IS VERY IMPORTANT
+# It ensures that when I restart yabai, all the rules (including the manage=off rules)
+# are reapplied to existing windows
+# Otherwise yabai takes care of management and I couldnt resize apps like
+# packet tracer for example
+yabai -m rule --apply
+echo "yabai configuration loaded.."

@@ -1,0 +1,50 @@
+#!/usr/bin/env sh
+# https://github.com/linkarzu/dotfiles-latest/blob/main/yabai/yabairc. config from sketchybar author dotfiles though
+# yabai -m signal --add event=dock_did_restart action="sudo yabai --load-sa"
+#
+# for mode in win spc; do
+for mode in spc; do
+    fifo="/tmp/yabai-$mode.fifo"
+    rm -f "$fifo" && mkfifo "$fifo"
+    if [ $mode = win ]; then
+        yabai -m signal --add event=window_focused action='echo "window_focused $YABAI_WINDOW_ID" > '$fifo''
+        #         yabai -m signal --add event=window_destroyed action='echo "window_destroyed $YABAI_WINDOW_ID" > '$fifo''
+        #         #yabai -m signal --add app='^Ghostty$' event=window_created action='echo "ghostty_created $YABAI_WINDOW_ID" > '$fifo''
+    else
+        yabai -m signal --add event=space_changed action='curl -s "http://127.0.0.1:'$OSX_EVTS_PORT'/evt/space_changed?space_id=$YABAI_SPACE_ID&space_index=$YABAI_SPACE_INDEX"'
+    fi
+done
+(cd /Users/gk/uv/osx && .venv/bin/python3 -m src.event_listener &)
+
+sudo yabai --load-sa
+
+#yabai -m config external_bar all:28:0 \
+yabai -m config \
+    active_window_opacity 1.0 \
+    auto_balance off \
+    bottom_padding 0 \
+    debug_output on \
+    external_bar all:0:0 \
+    focus_follows_mouse autofocus \
+    insert_feedback_color 0xff9dd274 \
+    layout bsp \
+    left_padding 8 \
+    mouse_action1 move \
+    mouse_action2 resize \
+    mouse_drop_action swap \
+    mouse_follows_focus off \
+    mouse_modifier ctrl \
+    normal_window_opacity 0.8 \
+    right_padding 0 \
+    split_ratio 0.50 \
+    top_padding 0 \
+    window_animation_duration 0.2 \
+    window_animation_easing ease_out_quint \
+    window_gap 8 \
+    window_opacity on \
+    window_opacity_duration 0.2 \
+    window_origin_display cursor \
+    window_placement first_child \
+    window_shadow float \
+    window_zoom_persist off
+yabai -m rule --add app="Claude" manage=on
