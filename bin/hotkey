@@ -1,0 +1,93 @@
+#!/usr/bin/env bash
+shw=false
+H="$HOME"
+PATH="/opt/homebrew/bin:$PATH"
+N=/opt/homebrew/bin/terminal-notifier
+function remove { sleep 2 && "$N" -remove ALL; }
+function n { $N -title "🎹 $1" -message "$2" -timeout 5 -sender org.hammerspoon.Hammerspoon && remove & }
+function yabai { /opt/homebrew/bin/yabai "$@"; }
+function win { run yabai -m window --"$1" "$2"; }
+function spc { run yabai -m space --"$1" "$2"; }
+function run {
+    $shw && echo "$*"
+    $shw && return
+    n "⎋" "$*"
+    "$@"
+}
+function exit_on_show_mode { $shw && exit; }
+function copycolor {
+    n "copycolor" "cmd-shift-c to copy the hex code to clipboard"
+    osascript -e 'tell application "Digital Color Meter" to activate' \
+        -e 'tell application "System Events" to tell process "Digital Color Meter" to set frontmost to true' \
+        -e 'tell application "System Events"
+              tell process "Digital Color Meter"
+                click menu item "Copy Color as Text" of menu "Color" of menu bar 1
+              end tell
+            end tell'
+}
+function screenshot {
+    local d="$H/Pictures/shots"
+    local fn && fn="$d/capt-$(date +%m-%d_%H-%M).png"
+    mkdir -p "$d"
+    if [ "$1" = 'interactive' ]; then
+        run screencapture -x -c -U -P -i || return 1
+    else
+        screencapture -x -c -i || return 1 # no sound, clipboard, interactive
+    fi
+    run pngpaste "$fn" || return 1
+    exit_on_show_mode
+    ln -sf "$fn" "$d/last.png"
+    rm -f "$H/Desktop/last.png"
+    cp "$fn" "$H/Desktop/last.png"
+}
+function win-to-space { win space "$1"; }
+function win-go-space {
+    win space "$1"
+    spc focus "$1"
+}
+
+function main {
+    if [[ $EUID -eq 0 ]]; then # called from kanata (root daemon)
+        launchctl asuser "$(id -u gk)" sudo -u gk "$0" "$@"
+        exit $?
+    fi
+    test "$1" = 'show' && shw=true && shift
+    case "$1" in
+    win2spc)
+        sleep 1
+        yabai -m window "$2" --space "$3"
+        exit
+        ;;
+    n) n "$@" ;;
+    k) win focus next || win focus first ;;
+    j) win focus prev || win focus last ;;
+    h) {
+        win resize 'left:150:0'
+        win resize 'right:150:0'
+    } ;;
+    l) {
+        win resize 'left:-150:0'
+        win resize 'right:-150:0'
+    } ;;
+
+    u) win toggle float ;;
+    i) win toggle sticky ;;
+    o) win toggle split ;;
+    openmedium) open "https://freedium-mirror.cfd/$(pbpaste)" ;;
+    wezterm) sudo -u gk /opt/homebrew/bin/wezterm start --always-new-process & ;;
+    wezterm-k9s) sudo -u gk /opt/homebrew/bin/wezterm start --always-new-process -- /opt/homebrew/bin/k9s & ;;
+    wezterm-todo) sudo -u gk /opt/homebrew/bin/wezterm start --always-new-process -- /opt/homebrew/bin/nvim /Users/gk/org/todo.md & ;;
+    kanatacfg) sudo -u gk /opt/homebrew/bin/wezterm start --always-new-process -- /opt/homebrew/bin/nvim /Users/gk/.config/kanata/default.kbd & ;;
+    space) win swap next || win swap first ;;
+    enter) win toggle zoom-fullscreen ;;
+    sleep) run osascript -e 'tell application "System Events" to sleep' ;;
+    type_voicechan) echo -n 'https://discord.com/channels/1210288790858375219/1330835593445245050' | sed 's/./& /g' | sed 's/:/S-;/g' | sed 's/^/(/; s/$/)/' ;;
+    type_date) date +'%F %R' | sed 's/./& /g' | sed 's/:/S-;/g' | sed 's/\(.\{20\}\)\(.*\)/\(\1 spc \2\)/' ;;
+    #enter) win toggle expose ;;
+    #enter) win toggle manage ;;
+    shiftenter) win display recent ;;
+    *) "$@" ;;
+    esac
+}
+main "$@"
+#n "hotkey" "$*"
